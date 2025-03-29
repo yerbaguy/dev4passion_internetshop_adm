@@ -1,0 +1,15 @@
+current directory: /Users/bartosz/Documents/react-native/dev4passion_internetshop_admin/vendor/bundle/ruby/2.7.0/gems/nkf-0.2.0/ext/nkf
+/Users/bartosz/.rbenv/versions/2.7.5/bin/ruby -I /Users/bartosz/.rbenv/versions/2.7.5/lib/ruby/2.7.0 -r ./siteconf20250329-66078-1v6i0b7.rb extconf.rb
+creating Makefile
+
+current directory: /Users/bartosz/Documents/react-native/dev4passion_internetshop_admin/vendor/bundle/ruby/2.7.0/gems/nkf-0.2.0/ext/nkf
+make "DESTDIR=" clean
+
+current directory: /Users/bartosz/Documents/react-native/dev4passion_internetshop_admin/vendor/bundle/ruby/2.7.0/gems/nkf-0.2.0/ext/nkf
+make "DESTDIR="
+compiling nkf.c
+linking shared-object nkf.bundle
+
+current directory: /Users/bartosz/Documents/react-native/dev4passion_internetshop_admin/vendor/bundle/ruby/2.7.0/gems/nkf-0.2.0/ext/nkf
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 nkf.bundle ./.gem.20250329-66078-h6uquz
