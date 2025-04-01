@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "39838192060",
+    "project_id": "internetshop-8bc07",
+    "storage_bucket": "internetshop-8bc07.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39838192060:android:8ce5d902aca7a41a625bb9",
+        "android_client_info": {
+          "package_name": "com.dev4passion_internetshop_admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnagDA_AgIcsah2I42KBh5Q5Dd9xJkikU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:39838192060:android:300d070eb08320b9625bb9",
+        "android_client_info": {
+          "package_name": "com.dev4passion_internetshop_admm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnagDA_AgIcsah2I42KBh5Q5Dd9xJkikU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

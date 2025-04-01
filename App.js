@@ -2,54 +2,179 @@ import 'react-native-gesture-handler';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text } from 'react-native';
+import firebase from '@react-native-firebase/app';
+import firestore from '@react-native-firebase/firestore';
+
+// Complete Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCEaylFdChEU-idKJjo5hF1L027hFIsdXk",
+  authDomain: "internetshop-8bc07.firebaseapp.com",
+  databaseURL: "https://internetshop-8bc07.firebaseio.com", // Added
+  projectId: "internetshop-8bc07",
+  storageBucket: "internetshop-8bc07.firebasestorage.app", // Corrected to .appspot.com
+  messagingSenderId: "39838192060",
+  appId: "1:39838192060:web:63fe6d61fa881474625bb9",
+  measurementId: "G-PVRM21E6EV" // Optional, can be omitted
+};
+
+// Initialize Firebase at module level
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+  console.log('Firebase initialized:', firebase.apps);
+} else {
+  console.log('Firebase already initialized:', firebase.apps);
+}
 
 const Drawer = createDrawerNavigator();
 
-const DashboardScreen = () => {
-  console.log('DashboardScreen rendered');
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.text}>Dashboard Screen</Text>
-    </View>
-  );
-};
-
-const SettingsScreen = () => {
-  console.log('SettingsScreen rendered');
-  return (
-    <View style={styles.screen}>
-      <Text style={styles.text}>Settings Screen</Text>
-    </View>
-  );
+const HomeScreen = () => {
+  React.useEffect(() => {
+    firestore()
+      .collection('test')
+      .get()
+      .then(querySnapshot => {
+        console.log('Firestore data:', querySnapshot.docs.map(doc => doc.data()));
+      })
+      .catch(error => console.error('Firestore error:', error));
+  }, []);
+  return <Text>Home Screen with Firebase</Text>;
 };
 
 const App = () => {
-  console.log('App rendered');
   return (
     <NavigationContainer>
-      <Drawer.Navigator initialRouteName="Dashboard">
-        <Drawer.Screen name="Dashboard" component={DashboardScreen} />
-        <Drawer.Screen name="Settings" component={SettingsScreen} />
+      <Drawer.Navigator>
+        <Drawer.Screen name="Home" component={HomeScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
 };
 
-const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
-
 export default App;
+
+
+
+// import React from 'react';
+// import { NavigationContainer } from '@react-navigation/native';
+// import { createDrawerNavigator } from '@react-navigation/drawer';
+// import { Text } from 'react-native';
+// import firebase from '@react-native-firebase/app'; // Import Firebase app
+// import firestore from '@react-native-firebase/firestore';
+
+// // Initialize Firebase (optional if native config is correct, but ensures JS-side setup)
+// if (!firebase.apps.length) {
+//   firebase.initializeApp(); // Uses google-services.json/GoogleService-Info.plist automatically
+// }
+
+// const Drawer = createDrawerNavigator();
+
+// const HomeScreen = () => {
+//   React.useEffect(() => {
+//     firestore()
+//       .collection('test')
+//       .get()
+//       .then(querySnapshot => {
+//         console.log('Firestore data:', querySnapshot.docs.map(doc => doc.data()));
+//       })
+//       .catch(error => console.error('Firestore error:', error));
+//   }, []);
+//   return <Text>Home Screen with Firebase</Text>;
+// };
+
+// const App = () => {
+//   return (
+//     <NavigationContainer>
+//       <Drawer.Navigator>
+//         <Drawer.Screen name="Home" component={HomeScreen} />
+//       </Drawer.Navigator>
+//     </NavigationContainer>
+//   );
+// };
+
+// export default App;
+
+
+
+ // import React from 'react';
+// import { Text } from 'react-native';
+// import { NavigationContainer } from '@react-navigation/native';
+// import { createDrawerNavigator } from '@react-navigation/drawer';
+// import firestore from '@react-native-firebase/firestore';
+
+// const Drawer = createDrawerNavigator();
+
+// const HomeScreen = () => {
+//   React.useEffect(() => {
+//     firestore().collection('test').get().then(querySnapshot => {
+//       console.log('Firestore data:', querySnapshot.docs.map(doc => doc.data()));
+//     });
+//   }, []);
+//   return <Text>Home Screen with Firebase</Text>;
+// };
+
+// const App = () => {
+//   return (
+//     <NavigationContainer>
+//       <Drawer.Navigator>
+//         <Drawer.Screen name="Home" component={HomeScreen} />
+//       </Drawer.Navigator>
+//     </NavigationContainer>
+//   );
+// };
+
+// export default App;
+// import React from 'react';
+// import { NavigationContainer } from '@react-navigation/native';
+// import { createDrawerNavigator } from '@react-navigation/drawer';
+// import { View, Text, StyleSheet } from 'react-native';
+
+// const Drawer = createDrawerNavigator();
+
+// const DashboardScreen = () => {
+//   console.log('DashboardScreen rendered');
+//   return (
+//     <View style={styles.screen}>
+//       <Text style={styles.text}>Dashboard Screen</Text>
+//     </View>
+//   );
+// };
+
+// const SettingsScreen = () => {
+//   console.log('SettingsScreen rendered');
+//   return (
+//     <View style={styles.screen}>
+//       <Text style={styles.text}>Settings Screen</Text>
+//     </View>
+//   );
+// };
+
+// const App = () => {
+//   console.log('App rendered');
+//   return (
+//     <NavigationContainer>
+//       <Drawer.Navigator initialRouteName="Dashboard">
+//         <Drawer.Screen name="Dashboard" component={DashboardScreen} />
+//         <Drawer.Screen name="Settings" component={SettingsScreen} />
+//       </Drawer.Navigator>
+//     </NavigationContainer>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   screen: {
+//     flex: 1,
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     backgroundColor: '#f5f5f5',
+//   },
+//   text: {
+//     fontSize: 20,
+//     fontWeight: 'bold',
+//   },
+// });
+
+// export default App;
 
 
 
