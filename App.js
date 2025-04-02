@@ -2,7 +2,8 @@ import 'react-native-gesture-handler';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { Text } from 'react-native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { View, Text } from 'react-native';
 import firebase from '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
 
@@ -27,6 +28,67 @@ if (!firebase.apps.length) {
 }
 
 const Drawer = createDrawerNavigator();
+const Stack = createStackNavigator();
+
+const MainStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen name="Main" component={MainScreen} options={{ title: 'Main' }} />
+    {/* <Stack.Screen name="AddProduct" component={AddProductScreen} options={{ title: 'Add Product' }} /> */}
+  </Stack.Navigator>
+);
+
+const ProductStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen name="ProductList" component={ProductListScreen} options={{ title: 'Products' }} />
+    <Stack.Screen name="AddProduct" component={AddProductScreen} options={{ title: 'Add Product' }} />
+  </Stack.Navigator>
+);
+
+const CategoryStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen name="Categories" component={CategoriesScreen} options={{ title: 'Categories' }} />
+    <Stack.Screen name="AddCategory" component={AddCategoryScreen} options={{ title: 'Add Category/Subcategory' }} />
+  </Stack.Navigator>
+);
+
+const MainScreen = () => {
+  React.useEffect(() => {
+    firestore()
+      .collection('test')
+      .get()
+      .then(querySnapshot => {
+        console.log('Firestore data:', querySnapshot.docs.map(doc => doc.data()));
+      })
+      .catch(error => console.error('Firestore error:', error));
+  }, []);
+  return <Text>Home Screen with Firebase</Text>;
+}
+
+
+const ProductListScreen = () => {
+  return (
+    <View><Text>ProductListScreen</Text></View>
+  )
+}
+
+const AddProductScreen = () => {
+  return (
+    <View><Text>AddProductScreen</Text></View>
+  )
+}
+
+const CategoriesScreen = () => {
+  return (
+    <View><Text>CategoriesScreen</Text></View>
+  )
+}
+
+const AddCategoryScreen = () => {
+  return (
+    <View><Text>AddCategoryScreen</Text></View>
+  )
+}
+
 
 const HomeScreen = () => {
   React.useEffect(() => {
@@ -43,9 +105,16 @@ const HomeScreen = () => {
 
 const App = () => {
   return (
+    // <NavigationContainer>
+    //   <Drawer.Navigator>
+    //     <Drawer.Screen name="Home" component={HomeScreen} />
+    //   </Drawer.Navigator>
+    // </NavigationContainer>
     <NavigationContainer>
-      <Drawer.Navigator>
-        <Drawer.Screen name="Home" component={HomeScreen} />
+      <Drawer.Navigator initialRouteName="Main">
+        <Drawer.Screen name="Main" component={MainStack} />
+        <Drawer.Screen name="Products" component={ProductStack} />
+        <Drawer.Screen name="Categories" component={CategoryStack} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
