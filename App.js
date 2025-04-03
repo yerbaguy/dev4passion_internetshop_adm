@@ -1,11 +1,17 @@
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, FlatList, TouchableOpacity } from 'react-native';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 import firebase from '@react-native-firebase/app';
 import firestore from '@react-native-firebase/firestore';
+// import { getFirestore } from 'firebase/firestore';
 
 // Complete Firebase config
 const firebaseConfig = {
@@ -26,6 +32,12 @@ if (!firebase.apps.length) {
 } else {
   console.log('Firebase already initialized:', firebase.apps);
 }
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+// const db = getFirestore(firebaseConfig)
+
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -71,10 +83,118 @@ const ProductListScreen = () => {
   )
 }
 
+// const AddProductScreen = () => {
+//   return (
+//     <View><Text>AddProductScreen</Text></View>
+//   )
+// }
+
 const AddProductScreen = () => {
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [image, setImage] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    const querySnapshot = await getDocs(collection(db, 'categories'));
+    setCategories(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
+  };
+
+  const addProduct = async () => {
+    if (!name || !price || !selectedCategory) return;
+
+    try {
+      let imageUrl = '';
+      if (image) {
+        const response = await fetch(image);
+        const blob = await response.blob();
+        const imageRef = ref(storage, `products/${Date.now()}`);
+        await uploadBytes(imageRef, blob);
+        imageUrl = await getDownloadURL(imageRef);
+      }
+
+      await addDoc(collection(db, 'products'), {
+        name,
+        price: parseFloat(price),
+        categoryId: selectedCategory,
+        imageUrl,
+        createdAt: new Date().toISOString()
+      });
+
+      // Reset form
+      setName('');
+      setPrice('');
+      setImage(null);
+      setSelectedCategory(null);
+    } catch (error) {
+      console.error('Error adding product:', error);
+    }
+  };
+
+  const renderCategory = ({ item, level = 0 }) => {
+    const subCategories = categories.filter(cat => cat.parentId === item.id);
+
+    return (
+      <View style={{ marginLeft: level * 20 }}>
+        <TouchableOpacity
+          onPress={() => setSelectedCategory(item.id)}
+          style={{ padding: 10 }}
+        >
+          <Text style={{ color: selectedCategory === item.id ? 'blue' : 'black' }}>
+            {item.name}
+          </Text>
+        </TouchableOpacity>
+        {subCategories.map(subCat => renderCategory({ item: subCat, level: level + 1 }))}
+      </View>
+    );
+  };
+
   return (
-    <View><Text>AddProductScreen</Text></View>
-  )
+    <View style={{ flex: 1, padding: 20 }}>
+      <TextInput
+        value={name}
+        onChangeText={setName}
+        placeholder="Product Name"
+        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+      />
+      <TextInput
+        value={price}
+        onChangeText={setPrice}
+        placeholder="Price"
+        keyboardType="numeric"
+        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+      />
+      <Button title="Pick an image" onPress={pickImage} />
+      <Text style={{ marginVertical: 10 }}>
+        Selected Category: {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : 'None'}
+      </Text>
+      <FlatList
+        data={categories.filter(cat => !cat.parentId)}
+        renderItem={renderCategory}
+        keyExtractor={item => item.id}
+        style={{ maxHeight: 200 }}
+      />
+      <Button title="Add Product" onPress={addProduct} />
+    </View>
+  );
 }
 
 const CategoriesScreen = () => {
@@ -83,10 +203,86 @@ const CategoriesScreen = () => {
   )
 }
 
+// const AddCategoryScreen = () => {
+//   return (
+//     <View><Text>AddCategoryScreen</Text></View>
+//   )
+// }
 const AddCategoryScreen = () => {
+  const [categories, setCategories] = useState([]);
+  const [categoryName, setCategoryName] = useState('');
+  const [parentCategoryId, setParentCategoryId] = useState(null);
+
+  const fetchCategories = async () => {
+    const querySnapshot = await getDocs(collection(db, 'categories'));
+    const categoriesList = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setCategories(categoriesList);
+  };
+
+  const addCategory = async () => {
+    if (!categoryName) return;
+    try {
+      await addDoc(collection(db, 'categories'), {
+        name: categoryName,
+        parentId: parentCategoryId,
+        createdAt: new Date().toISOString()
+      });
+      setCategoryName('');
+      setParentCategoryId(null);
+      fetchCategories();
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
+
+  const renderCategory = ({ item, level = 0 }) => {
+    const subCategories = categories.filter(cat => cat.parentId === item.id);
+    return (
+      <View style={{ marginLeft: level * 20 }}>
+        <TouchableOpacity
+          onPress={() => setParentCategoryId(item.id)}
+          style={styles.categoryItem}
+        >
+          <Text style={styles.categoryText}>{item.name}</Text>
+        </TouchableOpacity>
+        {subCategories.map(subCat => renderCategory({ item: subCat, level: level + 1 }))}
+      </View>
+    );
+  };
+
   return (
-    <View><Text>AddCategoryScreen</Text></View>
-  )
+    <View style={styles.container}>
+      <Text style={styles.title}>Category Management</Text>
+
+      {/* Add Category Form */}
+      <View style={styles.formContainer}>
+        <TextInput
+          value={categoryName}
+          onChangeText={setCategoryName}
+          placeholder="Enter category name"
+          style={styles.input}
+        />
+        <Text style={styles.label}>
+          Parent: {parentCategoryId ? categories.find(c => c.id === parentCategoryId)?.name : 'None'}
+        </Text>
+        <Button title="Add Category" onPress={addCategory} />
+      </View>
+
+      {/* Category List */}
+      <FlatList
+        data={categories.filter(cat => !cat.parentId)}
+        renderItem={renderCategory}
+        keyExtractor={item => item.id}
+        style={styles.list}
+      />
+    </View>
+  );
+  
+
+
 }
 
 
@@ -113,12 +309,27 @@ const App = () => {
     <NavigationContainer>
       <Drawer.Navigator initialRouteName="Main">
         <Drawer.Screen name="Main" component={MainStack} />
-        <Drawer.Screen name="Products" component={ProductStack} />
-        <Drawer.Screen name="Categories" component={CategoryStack} />
+        <Drawer.Screen name="Products" component={ProductListScreen} />
+        <Drawer.Screen name="Add Product" component={AddProductScreen} />
+        {/* <Drawer.Screen name="Categories" component={CategoryStack} /> */}
+        <Drawer.Screen name="Categories" component={CategoriesScreen} />
+        <Drawer.Screen name="Add Category" component={AddCategoryScreen} />
       </Drawer.Navigator>
     </NavigationContainer>
   );
 };
+
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: 20 },
+  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20 },
+  formContainer: { marginBottom: 20 },
+  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 5 },
+  label: { marginBottom: 10 },
+  list: { flex: 1 },
+  categoryItem: { padding: 10 },
+  categoryText: { fontSize: 16 }
+});
 
 export default App;
 
